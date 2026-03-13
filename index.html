@@ -1,0 +1,263 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Cartas de Conversación B1</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:system-ui,-apple-system,sans-serif;background:#f8f9fa;min-height:100vh;display:flex;justify-content:center;padding:2rem 1rem}
+.wrap{width:100%;max-width:580px}
+.hero{text-align:center;margin-bottom:1.75rem}
+.hero h1{font-size:26px;font-weight:600;color:#111;margin-bottom:6px;letter-spacing:-.3px}
+.hero p{font-size:14px;color:#666;line-height:1.5}
+.stats{display:flex;gap:8px;justify-content:center;margin-bottom:1rem}
+.stat{flex:1;max-width:110px;background:#fff;border-radius:12px;padding:12px 8px;text-align:center;border:1px solid #e5e7eb}
+.stat-n{font-size:26px;font-weight:600;color:#111;line-height:1}
+.stat-l{font-size:11px;color:#888;margin-top:4px;letter-spacing:.4px;text-transform:uppercase}
+.prog-wrap{height:6px;background:#e5e7eb;border-radius:3px;margin-bottom:1.25rem;overflow:hidden}
+.prog-fill{height:100%;border-radius:3px;transition:width .4s ease}
+.filters{display:flex;flex-wrap:wrap;gap:6px;justify-content:center;margin-bottom:1.5rem}
+.f-btn{font-size:12px;padding:5px 12px;border-radius:20px;border:1.5px solid;background:transparent;cursor:pointer;font-family:inherit;font-weight:500;transition:all .18s;white-space:nowrap}
+.f-btn.on{color:#fff}
+.card-area{display:flex;justify-content:center;min-height:280px;align-items:center;margin-bottom:1.25rem}
+.card{width:100%;border-radius:20px;overflow:hidden;border:1.5px solid;box-shadow:0 4px 16px rgba(0,0,0,.08);animation:slideIn .25s ease}
+@keyframes slideIn{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}
+.card-top{padding:14px 20px 12px;display:flex;align-items:center;justify-content:space-between}
+.card-label{display:flex;align-items:center;gap:8px}
+.card-label-dot{width:8px;height:8px;border-radius:50%;background:rgba(255,255,255,.55)}
+.card-label-text{font-size:11px;font-weight:600;letter-spacing:.6px;color:#fff;text-transform:uppercase}
+.card-num-badge{font-size:11px;color:rgba(255,255,255,.75);background:rgba(0,0,0,.15);padding:2px 9px;border-radius:10px}
+.card-body{background:#fff;padding:26px 26px 22px}
+.card-emoji{font-size:40px;margin-bottom:14px;display:block;line-height:1}
+.card-q{font-size:18px;font-weight:600;color:#111;line-height:1.55;margin-bottom:20px}
+.card-nota-wrap{border-radius:12px;padding:14px 16px}
+.card-nota-label{font-size:10px;font-weight:700;letter-spacing:.8px;text-transform:uppercase;margin-bottom:6px;opacity:.85}
+.card-nota-text{font-size:13px;line-height:1.65;font-style:italic}
+.btns{display:flex;gap:10px;justify-content:center;margin-bottom:.75rem}
+.btn{font-size:14px;padding:11px 24px;border-radius:10px;cursor:pointer;font-family:inherit;font-weight:500;transition:all .15s;border:1.5px solid}
+.btn-sec{background:#fff;color:#111;border-color:#d1d5db}
+.btn-sec:hover{background:#f3f4f6}
+.btn-pri{background:#111;color:#fff;border-color:#111}
+.btn-pri:hover{background:#333}
+.hint{font-size:12px;color:#888;text-align:center;min-height:18px;margin-top:4px}
+.empty-state{text-align:center;padding:2.5rem}
+.empty-icon{font-size:44px;margin-bottom:14px;display:block;line-height:1}
+.empty-text{font-size:15px;color:#888}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="hero">
+    <h1>🗣️ Cartas de Conversación</h1>
+    <p>Español B1 — Práctica de tiempos verbales<br>80 cartas · 8 categorías</p>
+  </div>
+  <div class="stats">
+    <div class="stat"><div class="stat-n" id="s-total">80</div><div class="stat-l">Total</div></div>
+    <div class="stat"><div class="stat-n" id="s-vistas">0</div><div class="stat-l">Vistas</div></div>
+    <div class="stat"><div class="stat-n" id="s-rest">80</div><div class="stat-l">Restantes</div></div>
+  </div>
+  <div class="prog-wrap"><div class="prog-fill" id="prog" style="width:0%;background:#4472C4"></div></div>
+  <div class="filters" id="filters"></div>
+  <div class="card-area" id="card-area">
+    <div class="empty-state">
+      <span class="empty-icon">🃏</span>
+      <p class="empty-text">Pulsa "Nueva carta" para empezar</p>
+    </div>
+  </div>
+  <div class="btns">
+    <button class="btn btn-sec" id="btn-shuffle">🔀 Barajar</button>
+    <button class="btn btn-pri" id="btn-next">Nueva carta</button>
+    <button class="btn btn-sec" id="btn-reset">↺ Reiniciar</button>
+  </div>
+  <div class="hint" id="hint"></div>
+</div>
+
+<script>
+(function(){
+var T=[
+  {id:"all",  label:"Todas",            color:"#6B7280", emoji:"🎴"},
+  {id:"ind",  label:"Pres. Indicativo", color:"#2563EB", emoji:"💬"},
+  {id:"indef",label:"Pret. Indefinido", color:"#16A34A", emoji:"📖"},
+  {id:"imp",  label:"Pret. Imperfecto", color:"#D97706", emoji:"🌅"},
+  {id:"perf", label:"Pret. Perfecto",   color:"#7C3AED", emoji:"✅"},
+  {id:"fut",  label:"Futuro Simple",    color:"#DC2626", emoji:"🔮"},
+  {id:"futc", label:"Futuro Cercano",   color:"#0891B2", emoji:"📅"},
+  {id:"subj", label:"Pres. Subjuntivo", color:"#DB2777", emoji:"💫"},
+  {id:"comod",label:"Comodín",          color:"#4472C4", emoji:"🃏"},
+];
+
+var LIGHT={
+  "2563EB":"#EFF6FF","16A34A":"#F0FDF4","D97706":"#FFFBEB",
+  "7C3AED":"#F5F3FF","DC2626":"#FEF2F2","0891B2":"#ECFEFF",
+  "DB2777":"#FDF2F8","4472C4":"#EFF6FF","6B7280":"#F9FAFB"
+};
+
+var D=[
+  ["ind","🎵","¿Qué tipo de música escuchas cuando haces alguna actividad?","Añade: 'Prefiero... porque me ayuda a...'"],
+  ["ind","🏖️","¿Qué haces normalmente los fines de semana?","Usa verbos reflexivos: levantarse, ducharse, quedarse..."],
+  ["ind","☀️","¿Qué haces cuando tienes un día libre?","Usa: soler + infinitivo (ej. 'suelo ir...')"],
+  ["ind","⏰","¿Cómo es tu rutina diaria entre semana?","Ordena con: primero, luego, después, por último..."],
+  ["ind","🍳","¿Qué comes normalmente en el desayuno en la comida y la cena?, ¿Meriendas?" ,"Usa verbos irregulares: tener, querer, preferir, pedir..."],
+  ["ind","🧠","¿Cómo te sientes cuando aprendes algo difícil en español?","Verbos de emoción: sentirse, ponerse nervioso/a, alegrarse..."],
+  ["ind","🛋️","¿Qué haces para relajarte después de un día largo?","Intenta usar al menos 3 verbos diferentes en tu respuesta."],
+  ["ind","🏠","¿Con quién vives y cómo es tu relación con esa persona?","Describe usando: llevarse bien/mal, compartir, respetar..."],
+  ["ind","⚽","¿Qué deportes o actividades físicas practicas?","Usa: jugar a + deporte / hacer + actividad (ej. 'hago yoga')"],
+  ["ind","📺","¿Qué programas o series ves en tu tiempo libre?","Añade tu opinión: 'Me parece... / Lo encuentro... / Creo que...'"],
+  ["indef","📅","¿Qué hiciste el fin de semana pasado?","Usa marcadores: el sábado, luego, después, por la noche..."],
+  ["indef","📚","¿Cuándo aprendiste una habilidad nueva? ¿Lo recuerdas?","Combina con: 'Creo que tenía... años cuando...'"],
+  ["indef","✈️","¿Alguna vez viajaste a otro país? ¿Cuándo fue?","Si no viajaste, di: 'Todavía no he viajado, pero me gustaría...'"],
+  ["indef","🍽️","¿Qué comiste ayer? Describe tu día desde el desayuno, la comida y la cena.","Practica verbos irregulares: ir, ser, tener, hacer, poder, cocinar, preparar..."],
+  ["indef","🎁","¿Cuál fue el mejor regalo que recibiste? ¿Cuándo fue?","Cuenta la historia completa: quién, qué, cuándo, por qué..."],
+  ["indef","🎬","¿Qué película viste la última vez que fuiste al cine?","Verbos útiles: ver, ir, comprar, sentarse, empezar, terminar..."],
+  ["indef","👨‍🍳","¿Cuándo fue la última vez que cocinaste algo especial?","Ordena las acciones: primero corté..., luego puse..., después..."],
+  ["indef","💡","¿Hubo algún momento en tu infancia que cambió tu vida?","Usa: fue cuando..., a partir de ese día..., desde entonces..."],
+  ["indef","🌴","¿Qué hiciste el último día de vacaciones que recuerdes?","Intenta incluir al menos 5 verbos en pretérito indefinido."],
+  ["indef","🤝","¿Cuándo conociste a tu mejor amigo/a? ¿Cómo fue?","Narración: empieza con 'Lo/la conocí cuando...' y continúa."],
+  ["imp","👦","¿Cómo era tu vida cuando tenías 10 años?","Describe rutinas pasadas: 'Todos los días iba... / Siempre jugaba...'"],
+  ["imp","🎠","¿Qué te gustaba hacer de niño/a que ya no haces ahora?","Contrasta con el presente: 'Antes me gustaba..., pero ahora prefiero...'"],
+  ["imp","🏫","¿Cómo era tu colegio o escuela? ¿Cómo eran tus profesores?","Usa adjetivos descriptivos y verbos de estado: ser, tener, estar..."],
+  ["imp","🌟","Cuando eras pequeño/a ¿Qué soñabas ser de grande?","Verbos de deseo pasado: quería, soñaba con, esperaba, pensaba..."],
+  ["imp","🏘️","¿Cómo era el vecindario donde creciste?","Describe el ambiente: había, era, tenía, se podía ver/escuchar..."],
+  ["imp","🎄","¿Qué tradiciones tenía tu familia cuando eras niño/a?","Usa: siempre, todos los años, cada domingo, normalmente..."],
+  ["imp","🛏️","¿Cómo era tu habitación de niño/a? ¿Qué había en ella?","Practica la descripción detallada con había, estaba, tenía..."],
+  ["imp","📺","¿Qué programas de televisión o juegos te gustaban de niño/a?","Añade: 'Lo que más me gustaba era... porque...'"],
+  ["imp","👫","¿Cómo era tu mejor amigo/a en la infancia?","Describe físico y personalidad: era, tenía, le gustaba, solía..."],
+  ["imp","☀️","¿Qué hacías los veranos cuando no había escuela?","Expresa duración y frecuencia: pasaba horas, todos los días, a menudo..."],
+  ["perf","🎉","¿Qué has hecho esta semana que te haya gustado?","Usa: esta semana, hoy, este mes, este año, últimamente..."],
+  ["perf","🍜","¿Has probado alguna comida de otro país? ¿Cuál?","Añade tu opinión: 'Me ha parecido... / Ha sido...'"],
+  ["perf","📖","¿Has aprendido algo nuevo recientemente? ¿Qué?","Contrasta con el indefinido: '¿Cuándo exactamente lo aprendiste?'"],
+  ["perf","🗺️","¿Has viajado a algún lugar interesante este año?","Usa: he ido, he visitado, he conocido, he visto, he comido..."],
+  ["perf","🗣️","¿Has hablado español fuera de clase esta semana?","Describe la experiencia: fue fácil/difícil, me sentí, aprendí..."],
+  ["perf","🎞️","¿Qué película o libro has disfrutado más últimamente?","Da detalles: 'Lo que más me ha gustado ha sido... porque...'"],
+  ["perf","🔧","¿Has tenido algún problema esta semana? ¿Cómo lo resolviste?","Combina perfecto (he tenido) con indefinido (lo resolví cuando...)."],
+  ["perf","🔄","¿Has cambiado algo de tu rutina últimamente? ¿Por qué?","Reflexiona: 'He decidido cambiar... porque me di cuenta de que...'"],
+  ["perf","🧑‍🤝‍🧑","¿Has conocido a alguien interesante recientemente?","Describe a la persona y el encuentro con detalle."],
+  ["perf","🏆","¿Qué es lo más emocionante que has hecho este mes?","Superlativo: 'Lo más... que he... ha sido...' Explica por qué."],
+  ["fut","🎓","¿Qué harás cuando termines de aprender español?","Usa: cuando + subjuntivo para la condición (ej. 'cuando termine...')"],
+  ["fut","🏡","¿Dónde vivirás dentro de 10 años?","Añade razones: 'porque...' / 'ya que...' / 'así podré...'"],
+  ["fut","🤖","¿Qué crees que pasará con la tecnología en el futuro?","Expresa probabilidad: 'seguramente', 'probablemente', 'es posible que...'"],
+  ["fut","🌍","¿Cómo será el mundo dentro de 50 años?","Habla de cambios globales: habrá, existirá, desaparecerá, se desarrollará..."],
+  ["fut","🌞","¿Qué harás este verano? ¿Tienes algún plan especial?","Contrasta: planes definidos (ir a + inf) vs. predicciones (futuro simple)."],
+  ["fut","💼","¿Dónde trabajarás en el futuro? ¿Qué tipo de trabajo tendrás?","Usa verbos irregulares: tendré, haré, podré, querré, vendré..."],
+  ["fut","📝","¿Qué harás en tus próximas vacaciones?","Condicional con futuro: 'Si..., entonces...' Haz al menos 3 predicciones."],
+  ["fut","✨","¿Cómo será tu vida ideal dentro de 5 años?","Describe en detalle: dónde vivirás, con quién, qué harás cada día..."],
+  ["fut","💪","¿Qué cambiarás de tus hábitos el próximo mes?","Usa conectores: además, también, por otro lado, sobre todo..."],
+  ["fut","🌐","¿Crees que aprenderás otro idioma en el futuro? ¿Cuál y por qué?","Expresa incertidumbre: quizás, tal vez, no estoy seguro/a pero..."],
+  ["futc","🌙","¿Qué vas a hacer después de la clase?","Compara con el futuro simple: ¿cuándo usarías 'haré' en vez de 'voy a hacer'?"],
+  ["futc","📚","¿Qué vas a aprender o mejorar este año?","Añade detalles: '...para poder...' / '...porque quiero...'"],
+  ["futc","🗓️","¿Qué vas a hacer el próximo fin de semana?","Diferencia: planes concretos (ir a) vs. predicciones (futuro simple)."],
+  ["futc","🍳","¿Qué vas a cocinar o comer mañana?","Describe el plan con detalles: '...primero voy a..., luego voy a...'"],
+  ["futc","🛍️","¿Qué vas a comprar la próxima vez que vayas de compras?","Justifica: 'Lo necesito porque... / Me lo voy a regalar porque...'"],
+  ["futc","🍿","¿Qué película o serie vas a ver pronto?","Explica por qué la elegiste y qué esperas de ella."],
+  ["futc","🎂","¿Qué vas a hacer para celebrar tu próximo cumpleaños?","Usa: voy a invitar, vamos a ir, va a haber... Incluye a otras personas."],
+  ["futc","🌱","¿Qué cambio positivo vas a hacer en tu vida este mes?","Compromiso real: 'A partir de hoy voy a... porque me ayudará a...'"],
+  ["futc","🧳","¿Adónde vas a viajar la próxima vez que tengas vacaciones?","Planifica: '...voy a visitar, voy a probar, voy a conocer...'"],
+  ["futc","🎯","¿Qué vas a estudiar o practicar después de esta clase?","Reflexiona sobre tu aprendizaje: '...para mejorar mi...'"],
+  ["subj","🏙️","¿Qué quieres que cambie en tu ciudad?","Estructura: Quiero que + subjuntivo (ej. 'Quiero que haya más...')"],
+  ["subj","👯","¿Qué te recomiendan tus amigos que hagas o no hagas?","Usa: me recomiendan que..., me piden que..., me dicen que..."],
+  ["subj","🌏","¿Qué esperas que pase en el mundo este año?","Expresiones: espero que..., ojalá..., es importante que..."],
+  ["subj","💬","¿Qué le aconsejas a alguien que empieza a aprender español?","Estructura: Te aconsejo que..., Es importante que..., Te recomiendo que..."],
+  ["subj","😊","¿Qué es necesario que haga una persona para ser feliz?","Impersonal + subjuntivo: es necesario que, es fundamental que, es bueno que..."],
+  ["subj","🎁","¿Qué quieres que te regalen en tu próximo cumpleaños?","Usa también: espero que..., ojalá..., me alegraría que..."],
+  ["subj","👩‍🏫","¿Qué le pides a tu profesor/a de español que haga en clase?","Verbos de petición + que + subjuntivo: pedir, querer, preferir, desear..."],
+  ["subj","❓","¿Qué dudas tienes sobre el español? ¿Qué quieres aprender en las clases?","Expresa deseos de aprendizaje: 'Necesito que me expliques...'"],
+  ["subj","✈️","¿Qué es importante que haga alguien antes de viajar a un país hispanohablante?","Usa: es esencial que, conviene que, es mejor que, recomiendo que..."],
+  ["subj","🫂","¿Qué esperas que haga tu mejor amigo/a por ti en momentos difíciles?","Verbos de emoción + subjuntivo: Me alegra que..., Me sorprende que..."],
+  ["comod","🎲","Elige cualquier tiempo verbal y cuenta algo que te pasó, que estás planeando o que deseas","¡Libertad total! Usa al menos 3 tiempos verbales diferentes."],
+  ["comod","⏳","¿Cómo era tu vida hace 5 años, cómo es ahora y cómo crees que será en el futuro?","¡Reto triple! Imperfecto + presente + futuro simple."],
+  ["comod","😂","Cuenta una anécdota divertida o memorable de tu vida usando el máximo de tiempos posible.","Combina: imperfecto (contexto) + indefinido (acción) + perfecto (resultado)."],
+  ["comod","💭","¿Cómo sería tu semana perfecta? ¿Qué hiciste, qué haces y qué harás?","Usa los tres ejes del tiempo: pasado, presente y futuro."],
+  ["comod","🌠","¿Qué sueño o meta tienes? ¿Qué quieres que pase y qué vas a hacer para conseguirlo?","Combina subjuntivo (quiero que...) + futuro cercano (voy a...)."],
+  ["comod","🔁","¿Si pudieras cambiar algo de tu pasado, qué cambiarías? ¿Por qué?","Hipótesis: usa imperfecto para describir cómo era y lo que habrías hecho diferente."],
+  ["comod","❤️","¿Cómo era, cómo es ahora y cómo crees que será alguien importante en tu vida?","Reto de descripción completa con los tres tiempos principales."],
+  ["comod","🌎","¿Qué has aprendido sobre la cultura hispanohablante y qué quieres seguir aprendiendo?","Perfecto (he aprendido) + subjuntivo (quiero que...) + futuro (seguiré...)."],
+  ["comod","📖","Inventa una pequeña historia! ¿Qué pasó, quién estaba allí y qué va a pasar después","Narración completa: indefinido + imperfecto + futuro cercano."],
+  ["comod","🚀","¿Qué planes tienes para aprender más español? ¿Qué vas a hacer y qué esperas conseguir?","Futuro cercano (voy a...) + subjuntivo (espero que...) + futuro simple (podré...)."],
+];
+
+var af="all",deck=[],seen=0;
+function gt(id){return T.find(function(t){return t.id===id;});}
+function filt(){return af==="all"?D.slice():D.filter(function(c){return c[0]===af;});}
+function shuffle(a){for(var i=a.length-1;i>0;i--){var j=Math.floor(Math.random()*(i+1));var x=a[i];a[i]=a[j];a[j]=x;}return a;}
+function buildDeck(){deck=shuffle(filt());seen=0;}
+function updateStats(){
+  var tot=filt().length;
+  document.getElementById("s-total").textContent=tot;
+  document.getElementById("s-vistas").textContent=seen;
+  document.getElementById("s-rest").textContent=deck.length;
+  var pct=tot>0?Math.round(seen/tot*100):0;
+  var t=gt(af);
+  document.getElementById("prog").style.width=pct+"%";
+  document.getElementById("prog").style.background=t?t.color:"#4472C4";
+}
+function renderCard(c){
+  var tid=c[0],em=c[1],q=c[2],nota=c[3];
+  var t=gt(tid);var col=t?t.color:"#4472C4";
+  var bg=LIGHT[col.replace("#","")]||"#F8FAFF";
+  var tot=filt().length;
+  document.getElementById("card-area").innerHTML=
+    '<div class="card" style="border-color:'+col+'">'+
+      '<div class="card-top" style="background:'+col+'">'+
+        '<div class="card-label">'+
+          '<div class="card-label-dot"></div>'+
+          '<span class="card-label-text">'+(t?t.label:"")+'</span>'+
+        '</div>'+
+        '<span class="card-num-badge">'+seen+' / '+tot+'</span>'+
+      '</div>'+
+      '<div class="card-body">'+
+        '<span class="card-emoji">'+em+'</span>'+
+        '<p class="card-q">'+q+'</p>'+
+        '<div class="card-nota-wrap" style="background:'+bg+'">'+
+          '<p class="card-nota-label" style="color:'+col+'">Nota gramatical</p>'+
+          '<p class="card-nota-text" style="color:'+col+'">'+nota+'</p>'+
+        '</div>'+
+      '</div>'+
+    '</div>';
+}
+function showEmpty(msg,icon){
+  document.getElementById("card-area").innerHTML=
+    '<div class="empty-state"><span class="empty-icon">'+icon+'</span><p class="empty-text">'+msg+'</p></div>';
+}
+function buildFilters(){
+  var row=document.getElementById("filters");row.innerHTML="";
+  T.forEach(function(t){
+    var count=t.id==="all"?D.length:D.filter(function(c){return c[0]===t.id;}).length;
+    var btn=document.createElement("button");
+    btn.className="f-btn"+(af===t.id?" on":"");
+    btn.dataset.id=t.id;
+    btn.textContent=t.emoji+" "+t.label+" ("+count+")";
+    btn.style.borderColor=t.color;
+    btn.style.color=af===t.id?"#fff":t.color;
+    btn.style.background=af===t.id?t.color:"transparent";
+    btn.addEventListener("click",function(){
+      af=t.id;
+      document.querySelectorAll(".f-btn").forEach(function(b){
+        var bt=gt(b.dataset.id);var bc=bt?bt.color:"#888";
+        b.style.background="transparent";b.style.color=bc;b.classList.remove("on");
+      });
+      btn.style.background=t.color;btn.style.color="#fff";btn.classList.add("on");
+      buildDeck();showEmpty('Pulsa "Nueva carta" para empezar',"🃏");
+      document.getElementById("hint").textContent="";updateStats();
+    });
+    row.appendChild(btn);
+  });
+}
+document.getElementById("btn-next").addEventListener("click",function(){
+  if(deck.length===0){document.getElementById("hint").textContent="¡Completaste todas las cartas! Pulsa Reiniciar para volver a empezar.";return;}
+  var c=deck.pop();seen++;renderCard(c);updateStats();
+  document.getElementById("hint").textContent="";
+});
+document.getElementById("btn-shuffle").addEventListener("click",function(){
+  buildDeck();showEmpty('¡Mazo barajado! Pulsa "Nueva carta"',"🔀");
+  document.getElementById("hint").textContent="";updateStats();
+});
+document.getElementById("btn-reset").addEventListener("click",function(){
+  buildDeck();showEmpty('Pulsa "Nueva carta" para empezar',"🃏");
+  document.getElementById("hint").textContent="";updateStats();
+});
+buildFilters();buildDeck();updateStats();
+})();
+</script>
+</body>
+</html>
